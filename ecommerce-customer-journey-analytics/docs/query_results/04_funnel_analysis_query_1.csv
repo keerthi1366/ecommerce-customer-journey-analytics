@@ -1,0 +1,8 @@
+funnel_stage,session_count,pct_of_initial_visits,stage_dropoff_pct
+1. Session Visit,32000,100.0,0.0
+2. Browse / Search,20376,63.67,36.33
+3. Product View,13841,43.25,32.07
+4. Add to Cart,4823,15.07,65.15
+5. Checkout Initiated,1436,4.49,70.23
+6. Payment Attempted,900,2.81,37.33
+7. Purchase Completed,857,2.68,4.78

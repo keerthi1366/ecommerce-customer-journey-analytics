@@ -1,0 +1,5 @@
+check_code,check_description,failed_count,check_status
+DQ_REF_01,Orphaned Web Sessions (Non-null user_id not in users),0,PASS
+DQ_REF_02,Orphaned Orders (Invalid user_id or session_id),0,PASS
+DQ_REF_03,Orphaned Order Items (Invalid order_id or product_id),0,PASS
+DQ_REF_04,Orphaned Funnel Events (Invalid session_id),0,PASS

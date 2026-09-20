@@ -1,0 +1,13 @@
+device_type,latency_tier,sessions_evaluated,converted_sessions,conversion_rate_pct
+Desktop,1. Fast (< 1.5s),3812,568,14.9
+Desktop,2. Moderate (1.5s - 2.5s),1438,254,17.66
+Desktop,3. Slow (2.5s - 4.0s),387,68,17.57
+Desktop,4. Critical Latency (> 4.0s),36,4,11.11
+Mobile,1. Fast (< 1.5s),1589,173,10.89
+Mobile,2. Moderate (1.5s - 2.5s),2708,284,10.49
+Mobile,3. Slow (2.5s - 4.0s),2435,220,9.03
+Mobile,4. Critical Latency (> 4.0s),845,89,10.53
+Tablet,1. Fast (< 1.5s),310,21,6.77
+Tablet,2. Moderate (1.5s - 2.5s),246,17,6.91
+Tablet,3. Slow (2.5s - 4.0s),136,10,7.35
+Tablet,4. Critical Latency (> 4.0s),30,6,20.0

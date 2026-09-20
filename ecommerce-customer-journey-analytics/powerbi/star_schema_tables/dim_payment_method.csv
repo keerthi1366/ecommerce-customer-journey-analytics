@@ -1,0 +1,6 @@
+payment_method_key,payment_method,payment_category,processing_fee_pct
+1,Credit Card,Credit,2.9
+2,Debit Card,Debit,1.5
+3,PayPal,Digital Wallet,3.4
+4,Apple Pay,Mobile Wallet,2.2
+5,Buy Now Pay Later,Financing / Installment,5.0

@@ -1,0 +1,6 @@
+payment_method,total_payment_attempts,successful_payments,failed_payments,failure_rate_pct,estimated_lost_gmv_usd,reported_error_codes
+Buy Now Pay Later,58,51,7,12.07,405.98,CREDIT_THRESHOLD_EXCEEDED
+Debit Card,185,173,12,6.49,984.96,DECLINED_BY_ISSUER
+PayPal,173,163,10,5.78,740.97,DECLINED_BY_ISSUER
+Apple Pay,93,90,3,3.23,316.0,DECLINED_BY_ISSUER
+Credit Card,391,380,11,2.81,775.99,DECLINED_BY_ISSUER

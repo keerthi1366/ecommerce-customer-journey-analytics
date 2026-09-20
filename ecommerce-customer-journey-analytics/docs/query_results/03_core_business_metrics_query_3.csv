@@ -1,0 +1,4 @@
+customer_frequency_tier,user_count,pct_of_customer_base,total_tier_revenue_usd,pct_of_total_revenue
+1 Order (One-Time Buyer),808,97.12,82796.55,93.03
+2 Orders (Repeat Buyer),23,2.76,6037.59,6.78
+3-5 Orders (Frequent Buyer),1,0.12,168.93,0.19

@@ -1,0 +1,4 @@
+device_type,total_sessions,cart_sessions,checkout_sessions,purchase_sessions,visit_to_cart_rate_pct,cart_abandonment_rate_pct,checkout_abandonment_rate_pct,overall_conversion_rate_pct
+Desktop,11329,1953,686,447,17.24,64.87,34.84,3.95
+Mobile,19072,2644,693,383,13.86,73.79,44.73,2.01
+Tablet,1599,226,57,27,14.13,74.78,52.63,1.69

@@ -1,0 +1,7 @@
+channel_key,traffic_source,channel_group,cost_structure
+1,Organic Search,Organic,Zero Direct Cost
+2,Direct,Direct,Zero Direct Cost
+3,Paid Search,Paid Marketing,PPC Cost
+4,Paid Social,Paid Marketing,Impression/CPC Cost
+5,Email,Owned Media,Campaign Cost
+6,Affiliate,Partner,Commission Cost

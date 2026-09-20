@@ -1,0 +1,7 @@
+customer_segment,total_customers,pct_of_customer_base,avg_recency_days,avg_order_frequency,avg_customer_spend_usd,total_segment_revenue_usd,revenue_contribution_pct
+At Risk / Need Attention,193,23.2,230.9,1.03,153.46,29618.45,33.28
+Champions,145,17.43,29.6,1.1,177.55,25744.55,28.93
+Loyal Customers,160,19.23,68.9,1.04,115.91,18545.61,20.84
+Lost Customers,141,16.95,223.0,1.0,44.61,6289.76,7.07
+Potential Loyalists / Recent Buyers,123,14.78,23.9,1.0,44.84,5515.86,6.2
+Promising / Developing,70,8.41,94.1,1.0,46.98,3288.84,3.7

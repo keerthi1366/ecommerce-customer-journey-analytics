@@ -1,0 +1,3 @@
+shipping_policy_tier,total_orders,avg_subtotal_usd,avg_shipping_fee_paid,total_shipping_revenue,total_gmv
+Free Shipping Tier ($75+),369,159.18,0.0,0.0,62693.48
+Paid Shipping Tier (< $75),488,42.97,7.99,3899.12,26309.59

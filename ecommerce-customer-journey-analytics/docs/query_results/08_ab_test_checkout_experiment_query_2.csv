@@ -1,0 +1,7 @@
+device,variant,participants,conversions,conversion_rate_pct,avg_duration_sec,error_rate_pct
+Desktop,Control,349,220,63.04,68.7,2.58
+Desktop,Treatment,337,227,67.36,49.9,5.34
+Mobile,Control,335,176,52.54,63.8,8.36
+Mobile,Treatment,358,207,57.82,49.2,8.94
+Tablet,Control,29,14,48.28,65.6,0.0
+Tablet,Treatment,28,13,46.43,52.5,0.0

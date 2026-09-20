@@ -1,0 +1,7 @@
+traffic_source,total_sessions,cart_sessions,purchase_sessions,visit_to_cart_rate_pct,cart_abandonment_pct,overall_conversion_rate_pct
+Email,3261,579,127,17.76,60.28,3.89
+Direct,5717,1002,203,17.53,68.96,3.55
+Organic Search,8919,1324,221,14.84,71.0,2.48
+Paid Search,6968,1071,172,15.37,72.83,2.47
+Affiliate,1311,185,29,14.11,71.35,2.21
+Paid Social,5824,662,105,11.37,74.77,1.8

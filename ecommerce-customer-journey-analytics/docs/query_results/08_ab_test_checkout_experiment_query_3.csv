@@ -1,0 +1,3 @@
+variant,observed_count,observed_ratio_pct,expected_ratio_pct,srm_status
+Control,713,49.65,50.0,SRM CHECK PASS (Balanced Allocation)
+Treatment,723,50.35,50.0,SRM CHECK PASS (Balanced Allocation)

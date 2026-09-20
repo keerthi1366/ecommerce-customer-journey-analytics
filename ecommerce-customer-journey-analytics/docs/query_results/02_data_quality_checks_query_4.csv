@@ -1,0 +1,4 @@
+check_code,check_description,failed_count,check_status
+DQ_UNIQ_01,Duplicate user_id in users,0,PASS
+DQ_UNIQ_02,Duplicate session_id in web_sessions,0,PASS
+DQ_UNIQ_03,Duplicate order_id in orders,0,PASS

@@ -1,0 +1,4 @@
+device_key,device_type,form_factor,touch_enabled
+1,Desktop,Computer,0
+2,Mobile,Handheld Smartphone,1
+3,Tablet,Touch Tablet,1

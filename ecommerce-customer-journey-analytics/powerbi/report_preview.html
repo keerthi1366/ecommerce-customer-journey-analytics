@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Analytics Dashboard Preview — E-commerce Customer Journey & Conversion</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #090d16;
+      --surface: #0f172a;
+      --surface-border: #1e293b;
+      --card-bg: #131d31;
+      --card-border: #24324d;
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --neutral-metric: #94a3b8;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 1.5rem; line-height: 1.5; }
+    
+    /* Top Disclaimers & Header */
+    .disclaimer-banner {
+      background: #172033;
+      border-left: 4px solid #38bdf8;
+      padding: 0.6rem 1rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .disclaimer-banner strong { color: #38bdf8; }
+    .badge-sim { background: #312e81; color: #c7d2fe; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+
+    .header-bar { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem; margin-bottom: 1rem; }
+    .header-title h1 { font-size: 1.4rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .header-title p { font-size: 0.825rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .time-indicator { background: var(--surface); border: 1px solid var(--surface-border); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.8rem; color: #e2e8f0; font-weight: 500; }
+
+    /* Filter Bar */
+    .filter-bar {
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+    .filter-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.35rem; }
+    .filter-group { display: flex; align-items: center; gap: 0.5rem; }
+    .filter-select {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+    }
+    .filter-select:focus { border-color: var(--primary); }
+    .filter-reset-btn {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: all 0.2s;
+    }
+    .filter-reset-btn:hover { background: #1e293b; color: #fff; }
+
+    /* Navigation Tabs */
+    .nav-tabs { display: flex; gap: 0.4rem; border-bottom: 1px solid var(--surface-border); margin-bottom: 1.25rem; overflow-x: auto; }
+    .nav-tab { padding: 0.55rem 1.1rem; cursor: pointer; border-radius: 6px 6px 0 0; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); transition: all 0.2s; border-bottom: 2px solid transparent; }
+    .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.03); }
+    .nav-tab.active { color: #fff; border-bottom: 2px solid var(--primary); background: rgba(99,102,241,0.12); }
+
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 0.9rem 1.1rem; }
+    .kpi-label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 0.25rem; font-weight: 600; }
+    .kpi-value { font-size: 1.55rem; font-weight: 700; color: #fff; }
+    .kpi-sub { font-size: 0.75rem; margin-top: 0.25rem; color: #94a3b8; }
+    
+    .charts-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .chart-panel { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 1.1rem; }
+    .panel-title { font-size: 0.9rem; font-weight: 600; color: #e2e8f0; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
+    .panel-subtitle { font-size: 0.75rem; color: #64748b; font-weight: 400; }
+
+    /* Tables */
+    .data-table-container { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 1.1rem; overflow-x: auto; margin-bottom: 1.25rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { text-align: left; padding: 0.65rem 0.75rem; background: #0c1322; color: #94a3b8; border-bottom: 1px solid var(--surface-border); font-weight: 600; }
+    td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #1a253a; color: #cbd5e1; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Structured Insight & Observation Panels */
+    .insight-panel {
+      background: #0f172a;
+      border: 1px solid #293854;
+      border-radius: 8px;
+      padding: 1.1rem;
+      margin-bottom: 1.25rem;
+    }
+    .insight-header {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #a5b4fc;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+    .framework-flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .flow-step {
+      background: #141f36;
+      border: 1px solid #233352;
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+    .flow-step-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.3rem;
+      display: inline-block;
+    }
+    .tag-obs { color: #38bdf8; }
+    .tag-inv { color: #fbbf24; }
+    .tag-hyp { color: #c084fc; }
+    .tag-rec { color: #34d399; }
+    .tag-met { color: #f472b6; }
+    .flow-step p { font-size: 0.78rem; color: #cbd5e1; line-height: 1.4; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .status-pill {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .status-pass { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .status-warn { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .status-alert { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Synthetic Data Disclosure & Distinction -->
+  <div class="disclaimer-banner">
+    <div>
+      <strong>Data Note:</strong> This project uses synthetically generated e-commerce data designed to reproduce realistic product behavior for portfolio and analytical demonstration purposes. No real customer data is used.
+    </div>
+    <span class="badge-sim">Interactive HTML Preview (Simulating Power BI Model)</span>
+  </div>
+
+  <!-- Header -->
+  <div class="header-bar">
+    <div class="header-title">
+      <h1>🛒 E-commerce Customer Journey & Conversion Analytics</h1>
+      <p>Product Analytics Suite & Diagnostic Funnel Investigation | Verified on MySQL 8.0 & Ralph Kimball Star Schema</p>
+    </div>
+    <div class="time-indicator">
+      Time Period: <strong>Full Year 2025</strong> (Jan 1, 2025 – Dec 31, 2025)
+    </div>
+  </div>
+
+  <!-- Top Global Filters (Dynamic across tabs) -->
+  <div class="filter-bar">
+    <span class="filter-label">🔍 Dashboard Filters:</span>
+    
+    <div class="filter-group">
+      <label class="filter-label" for="filterDevice">Device:</label>
+      <select id="filterDevice" class="filter-select" onchange="applyFilters()">
+        <option value="All">All Devices (32,000)</option>
+        <option value="Desktop">Desktop (11,329)</option>
+        <option value="Mobile">Mobile (19,072)</option>
+        <option value="Tablet">Tablet (1,599)</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="filterChannel">Acquisition Channel:</label>
+      <select id="filterChannel" class="filter-select" onchange="applyFilters()">
+        <option value="All">All Channels (6)</option>
+        <option value="Organic Search">Organic Search (8,919)</option>
+        <option value="Direct">Direct (5,717)</option>
+        <option value="Paid Search">Paid Search (6,968)</option>
+        <option value="Paid Social">Paid Social (5,824)</option>
+        <option value="Email">Email (3,261)</option>
+        <option value="Affiliate">Affiliate (1,311)</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="filterQuarter">Quarter:</label>
+      <select id="filterQuarter" class="filter-select" onchange="applyFilters()">
+        <option value="All">All Quarters (FY 2025)</option>
+        <option value="Q1">Q1 (Jan - Mar)</option>
+        <option value="Q2">Q2 (Apr - Jun)</option>
+        <option value="Q3">Q3 (Jul - Sep)</option>
+        <option value="Q4">Q4 (Oct - Dec)</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="filterCategory">Category:</label>
+      <select id="filterCategory" class="filter-select" onchange="applyFilters()">
+        <option value="All">All Categories (5)</option>
+        <option value="Home & Kitchen">Home & Kitchen</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Apparel">Apparel</option>
+        <option value="Sports">Sports</option>
+        <option value="Beauty">Beauty</option>
+      </select>
+    </div>
+
+    <button class="filter-reset-btn" onclick="resetFilters()">↺ Reset Filters</button>
+  </div>
+
+  <!-- Page Navigation -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab(0)">Page 1: Executive Overview</div>
+    <div class="nav-tab" onclick="switchTab(1)">Page 2: Customer Journey & Funnel</div>
+    <div class="nav-tab" onclick="switchTab(2)">Page 3: Customer Cohorts & RFM</div>
+    <div class="nav-tab" onclick="switchTab(3)">Page 4: Product & Category Analytics</div>
+    <div class="nav-tab" onclick="switchTab(4)">Page 5: Root-Cause & Simulated A/B Test</div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 1: EXECUTIVE OVERVIEW                                  -->
+  <!-- ============================================================ -->
+  <div class="tab-content active" id="tab-0">
+    <!-- Top KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">GMV (Gross Merchandise Value)</div>
+        <div class="kpi-value" id="kpiGMV">$89,003</div>
+        <div class="kpi-sub" id="subGMV">$79,707 Net Merchandise Value</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Completed Orders</div>
+        <div class="kpi-value" id="kpiOrders">857</div>
+        <div class="kpi-sub" id="subOrders">832 Unique Purchasing Customers</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Overall Conversion Rate</div>
+        <div class="kpi-value" id="kpiConversion">2.68%</div>
+        <div class="kpi-sub" id="subConversion">Desktop 3.95% vs Mobile 2.01%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Average Order Value (AOV)</div>
+        <div class="kpi-value" id="kpiAOV">$103.85</div>
+        <div class="kpi-sub" id="subAOV">$159.18 for orders with Free Shipping</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active Users / Sessions</div>
+        <div class="kpi-value" id="kpiSessions">32,000</div>
+        <div class="kpi-sub" id="subSessions">8,769 Identified Active Users</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid-2">
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Monthly GMV Trajectory (USD)</span>
+          <span class="panel-subtitle">Aggregated by order_timestamp</span>
+        </div>
+        <canvas id="chartP1Revenue" height="190"></canvas>
+      </div>
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Conversion Rate by Device Form Factor (%)</span>
+          <span class="panel-subtitle">Orders / Sessions</span>
+        </div>
+        <canvas id="chartP1Device" height="190"></canvas>
+      </div>
+    </div>
+
+    <!-- Funnel Summary Mini-Matrix & Key Observations -->
+    <div class="charts-grid-2">
+      <div class="data-table-container" style="margin-bottom:0;">
+        <div class="panel-title">Funnel Milestone Summary (Actual SQL Counts)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Journey Milestone</th>
+              <th>Sessions</th>
+              <th>Milestone Reach %</th>
+              <th>Drop-off vs Previous</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1. Session Visit</td><td>32,000</td><td>100.0%</td><td>—</td></tr>
+            <tr><td>2. Product View</td><td>13,841</td><td>43.3%</td><td>32.1% dropped</td></tr>
+            <tr><td>3. Add to Cart</td><td>4,823</td><td>15.1%</td><td>65.2% dropped</td></tr>
+            <tr><td>4. Checkout Initiated</td><td>1,436</td><td>4.5%</td><td>70.2% dropped</td></tr>
+            <tr><td>5. Order Placed</td><td>857</td><td>2.7%</td><td>40.3% dropped</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Structured Key Observations Panel -->
+      <div class="insight-panel" style="margin-bottom:0;">
+        <div class="insight-header">📌 Key Observations & Product Diagnostic Focus</div>
+        <div class="framework-flow">
+          <div class="flow-step">
+            <span class="flow-step-tag tag-obs">OBSERVED PATTERN</span>
+            <p>Mobile conversion (2.01%) is 49.1% lower than Desktop (3.95%), despite representing 59.6% of browsing sessions.</p>
+          </div>
+          <div class="flow-step">
+            <span class="flow-step-tag tag-inv">INVESTIGATION</span>
+            <p>Segmenting by funnel stage reveals that mobile users add to cart at healthy rates (~14%), but abandon disproportionately during multi-step checkout.</p>
+          </div>
+          <div class="flow-step">
+            <span class="flow-step-tag tag-hyp">HYPOTHESIS</span>
+            <p>Checkout form complexity and higher page latency on handheld devices are potential contributors requiring controlled experimentation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 2: CUSTOMER JOURNEY / FUNNEL                           -->
+  <!-- ============================================================ -->
+  <div class="tab-content" id="tab-1">
+    <div class="charts-grid-2">
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>7-Stage Macro Customer Journey Funnel</span>
+          <span class="panel-subtitle">Session volume progressing through steps</span>
+        </div>
+        <canvas id="chartP2Funnel" height="220"></canvas>
+      </div>
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Stage-by-Stage Drop-off Rate (%)</span>
+          <span class="panel-subtitle">Identifies specific leaks in user journey</span>
+        </div>
+        <canvas id="chartP2Dropoff" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Complete 7-Stage Detailed Breakdown Table -->
+    <div class="data-table-container">
+      <div class="panel-title">Complete Funnel Progression Table (Derived from `sql/04_funnel_analysis.sql`)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Funnel Stage</th>
+            <th>Sessions Reached</th>
+            <th>% of Total Visits</th>
+            <th>Stage-to-Stage Drop-off Count</th>
+            <th>Stage Drop-off %</th>
+            <th>Diagnostic Assessment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Session Visit</strong></td>
+            <td>32,000</td>
+            <td>100.00%</td>
+            <td>11,624 exited</td>
+            <td>36.33%</td>
+            <td><span class="status-pill status-pass">Standard Bounce</span></td>
+          </tr>
+          <tr>
+            <td><strong>2. Browse / Search</strong></td>
+            <td>20,376</td>
+            <td>63.67%</td>
+            <td>6,535 stopped browsing</td>
+            <td>32.07%</td>
+            <td><span class="status-pill status-pass">Healthy Exploration</span></td>
+          </tr>
+          <tr>
+            <td><strong>3. Product View</strong></td>
+            <td>13,841</td>
+            <td>43.25%</td>
+            <td>9,018 did not add to cart</td>
+            <td>65.15%</td>
+            <td><span class="status-pill status-alert">Leak 1: View-to-Cart Drop</span></td>
+          </tr>
+          <tr>
+            <td><strong>4. Add to Cart</strong></td>
+            <td>4,823</td>
+            <td>15.07%</td>
+            <td>3,387 abandoned cart</td>
+            <td>70.23%</td>
+            <td><span class="status-pill status-alert">Leak 2: 82.2% Cart Abandonment</span></td>
+          </tr>
+          <tr>
+            <td><strong>5. Checkout Initiated</strong></td>
+            <td>1,436</td>
+            <td>4.49%</td>
+            <td>536 abandoned checkout</td>
+            <td>37.33%</td>
+            <td><span class="status-pill status-warn">Leak 3: Form Fatigue / Shipping</span></td>
+          </tr>
+          <tr>
+            <td><strong>6. Payment Attempted</strong></td>
+            <td>900</td>
+            <td>2.81%</td>
+            <td>43 failed authorization</td>
+            <td>4.78%</td>
+            <td><span class="status-pill status-warn">Leak 4: Gateway Declines</span></td>
+          </tr>
+          <tr>
+            <td><strong>7. Purchase Completed</strong></td>
+            <td>857</td>
+            <td>2.68%</td>
+            <td>—</td>
+            <td>—</td>
+            <td><span class="status-pill status-pass">Final Orders Placed</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Segment Breakdown Tables -->
+    <div class="charts-grid-2">
+      <div class="data-table-container">
+        <div class="panel-title">Funnel Performance by Device</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th>Sessions</th>
+              <th>Cart Rate %</th>
+              <th>Cart Abandon %</th>
+              <th>Conversion %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Desktop</td><td>11,329</td><td>17.24%</td><td>64.87%</td><td><strong>3.95%</strong></td></tr>
+            <tr><td>Mobile</td><td>19,072</td><td>13.86%</td><td>73.79%</td><td><strong>2.01%</strong></td></tr>
+            <tr><td>Tablet</td><td>1,599</td><td>14.13%</td><td>74.78%</td><td><strong>1.69%</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="data-table-container">
+        <div class="panel-title">Funnel Performance by Acquisition Channel</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Sessions</th>
+              <th>Cart Rate %</th>
+              <th>Cart Abandon %</th>
+              <th>Conversion %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Email</td><td>3,261</td><td>17.76%</td><td>60.28%</td><td><strong>3.89%</strong></td></tr>
+            <tr><td>Direct</td><td>5,717</td><td>17.53%</td><td>68.96%</td><td><strong>3.55%</strong></td></tr>
+            <tr><td>Organic Search</td><td>8,919</td><td>14.84%</td><td>71.00%</td><td><strong>2.48%</strong></td></tr>
+            <tr><td>Paid Search</td><td>6,968</td><td>15.37%</td><td>72.83%</td><td><strong>2.47%</strong></td></tr>
+            <tr><td>Affiliate</td><td>1,311</td><td>14.11%</td><td>71.35%</td><td><strong>2.21%</strong></td></tr>
+            <tr><td>Paid Social</td><td>5,824</td><td>11.37%</td><td>74.77%</td><td><strong>1.80%</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 3: COHORT & RFM                                        -->
+  <!-- ============================================================ -->
+  <div class="tab-content" id="tab-2">
+    <!-- Top Summary Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Purchasing Customers</div>
+        <div class="kpi-value">832</div>
+        <div class="kpi-sub">808 One-Time Buyers (97.1%)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Repeat Purchase Rate</div>
+        <div class="kpi-value">2.88%</div>
+        <div class="kpi-sub">24 customers with &ge; 2 orders</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Champions Segment Revenue</div>
+        <div class="kpi-value">$25,745</div>
+        <div class="kpi-sub">145 customers (28.9% of GMV)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">At-Risk Segment Revenue</div>
+        <div class="kpi-value">$29,618</div>
+        <div class="kpi-sub">193 customers (33.3% of GMV)</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid-2">
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Customer Retention Rate Curve (M0 – M6 %)</span>
+          <span class="panel-subtitle">Average cohort retention over time</span>
+        </div>
+        <canvas id="chartP3Retention" height="200"></canvas>
+      </div>
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Revenue Contribution by RFM Customer Segment</span>
+          <span class="panel-subtitle">Calculated via NTILE quintile scoring</span>
+        </div>
+        <canvas id="chartP3RFM" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- RFM Table -->
+    <div class="data-table-container">
+      <div class="panel-title">RFM Customer Segmentation Summary (From `sql/05_customer_cohort_rfm.sql`)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Customer Segment</th>
+            <th>Customers</th>
+            <th>% of Base</th>
+            <th>Avg Recency (Days)</th>
+            <th>Avg Frequency</th>
+            <th>Avg Spend (USD)</th>
+            <th>Total GMV</th>
+            <th>GMV Contribution %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>At Risk / Need Attention</strong></td>
+            <td>193</td>
+            <td>23.2%</td>
+            <td>230.9 days</td>
+            <td>1.03</td>
+            <td>$153.46</td>
+            <td>$29,618.45</td>
+            <td><strong>33.28%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Champions</strong></td>
+            <td>145</td>
+            <td>17.4%</td>
+            <td>29.6 days</td>
+            <td>1.10</td>
+            <td>$177.55</td>
+            <td>$25,744.55</td>
+            <td><strong>28.93%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Loyal Customers</strong></td>
+            <td>160</td>
+            <td>19.2%</td>
+            <td>68.9 days</td>
+            <td>1.04</td>
+            <td>$115.91</td>
+            <td>$18,545.61</td>
+            <td><strong>20.84%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Lost Customers</strong></td>
+            <td>141</td>
+            <td>17.0%</td>
+            <td>223.0 days</td>
+            <td>1.00</td>
+            <td>$44.61</td>
+            <td>$6,289.76</td>
+            <td><strong>7.07%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Potential Loyalists</strong></td>
+            <td>123</td>
+            <td>14.8%</td>
+            <td>23.9 days</td>
+            <td>1.00</td>
+            <td>$44.84</td>
+            <td>$5,515.86</td>
+            <td><strong>6.20%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Promising / Developing</strong></td>
+            <td>70</td>
+            <td>8.4%</td>
+            <td>94.1 days</td>
+            <td>1.00</td>
+            <td>$46.98</td>
+            <td>$3,288.84</td>
+            <td><strong>3.70%</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Structured Insight Panel -->
+    <div class="insight-panel">
+      <div class="insight-header">📌 Product Analytics Retention Insight</div>
+      <div class="framework-flow">
+        <div class="flow-step">
+          <span class="flow-step-tag tag-obs">OBSERVED PATTERN</span>
+          <p>The 'At-Risk' segment represents 193 customers who generated $29,618 (33.3% of historic GMV), but have not made a purchase in an average of 231 days.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-rec">POTENTIAL ACTION</span>
+          <p>Evaluate an automated win-back campaign offering personalized product recommendations and free shipping vouchers to this cohort.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-met">SUCCESS METRIC</span>
+          <p>Reactivation rate and repeat purchase rate expansion from 2.88% toward 5.0% over the subsequent 90-day window.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 4: PRODUCTS & CATEGORIES                               -->
+  <!-- ============================================================ -->
+  <div class="tab-content" id="tab-3">
+    <!-- Top Category KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Top GMV Category</div>
+        <div class="kpi-value">Home & Kitchen</div>
+        <div class="kpi-sub">$24,384 GMV (30.6% share)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Highest Margin Category</div>
+        <div class="kpi-value">Beauty (68.4%)</div>
+        <div class="kpi-sub">$5,974 Profit on $8,739 Revenue</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Highest View &rarr; Cart Rate</div>
+        <div class="kpi-value">Beauty (40.2%)</div>
+        <div class="kpi-sub">Apparel: 39.9% | Electronics: 29.8%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Top Revenue SKU</div>
+        <div class="kpi-value" style="font-size:1.15rem; padding-top:0.3rem;">Espresso Machine</div>
+        <div class="kpi-sub">$11,866 (14.9% of catalog GMV)</div>
+      </div>
+    </div>
+
+    <!-- Quadrant Scatter Plot & Category Breakdown -->
+    <div class="charts-grid-2">
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Product Quadrant Analysis (View &rarr; Cart % vs Cart &rarr; Purchase %)</span>
+          <span class="panel-subtitle">Bubble size = SKU Revenue</span>
+        </div>
+        <canvas id="chartP4Scatter" height="210"></canvas>
+      </div>
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Pareto (80/20) Cumulative Revenue Curve</span>
+          <span class="panel-subtitle">Validates catalog revenue concentration</span>
+        </div>
+        <canvas id="chartP4Pareto" height="210"></canvas>
+      </div>
+    </div>
+
+    <!-- Category Performance Table -->
+    <div class="data-table-container">
+      <div class="panel-title">Category-Level Merchandising & Margin Performance (From `sql/06_product_category_analysis.sql`)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Product Views</th>
+            <th>Cart Adds</th>
+            <th>Orders</th>
+            <th>View &rarr; Cart %</th>
+            <th>Cart &rarr; Order %</th>
+            <th>Overall Conv %</th>
+            <th>Category Revenue</th>
+            <th>Gross Margin %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Home & Kitchen</strong></td>
+            <td>2,972</td>
+            <td>951</td>
+            <td>162</td>
+            <td>32.00%</td>
+            <td>17.03%</td>
+            <td>5.45%</td>
+            <td>$24,384.00</td>
+            <td><strong>57.01%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Electronics</strong></td>
+            <td>3,286</td>
+            <td>980</td>
+            <td>166</td>
+            <td>29.82%</td>
+            <td>16.94%</td>
+            <td>5.05%</td>
+            <td>$20,172.75</td>
+            <td><strong>49.72%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Apparel</strong></td>
+            <td>2,923</td>
+            <td>1,165</td>
+            <td>219</td>
+            <td>39.86%</td>
+            <td>18.80%</td>
+            <td>7.49%</td>
+            <td>$17,071.00</td>
+            <td><strong>64.71%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Sports</strong></td>
+            <td>2,082</td>
+            <td>690</td>
+            <td>117</td>
+            <td>33.14%</td>
+            <td>16.96%</td>
+            <td>5.62%</td>
+            <td>$9,340.00</td>
+            <td><strong>62.49%</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Beauty</strong></td>
+            <td>2,578</td>
+            <td>1,037</td>
+            <td>193</td>
+            <td>40.22%</td>
+            <td>18.61%</td>
+            <td>7.49%</td>
+            <td>$8,739.00</td>
+            <td><strong>68.35%</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Product Quadrant Interpretation Panel -->
+    <div class="insight-panel">
+      <div class="insight-header">🔍 Merchandising Matrix Interpretation (4 Quadrants)</div>
+      <div class="framework-flow">
+        <div class="flow-step">
+          <span class="flow-step-tag tag-obs">HIGH VIEW / HIGH CONV</span>
+          <p><strong>Espresso Machine, Trench Coat, Sonic Toothbrush:</strong> Flagship revenue drivers. Ensure continuous stock availability and prominent homepage merchandising.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-inv">HIGH VIEW / LOW CONV</span>
+          <p><strong>4K Monitor, Gaming Mouse, Wireless Headphones:</strong> High customer interest but low cart completion. Hypothesize price sensitivity or missing technical specs.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-hyp">LOW VIEW / HIGH CONV</span>
+          <p><strong>Hydrating Serum, Cotton T-Shirt, Neoprene Dumbbells:</strong> Exceptional checkout conversion once discovered. Priority candidates for ad budget reallocation.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-rec">LOW VIEW / LOW CONV</span>
+          <p><strong>Aromatherapy Diffuser, Hydration Vest:</strong> Low traction across the funnel. Review search tagging or consider catalog phase-out.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE 5: ROOT CAUSE & SIMULATED EXPERIMENTATION              -->
+  <!-- ============================================================ -->
+  <div class="tab-content" id="tab-4">
+    <!-- Structured Insight Panel -->
+    <div class="insight-panel">
+      <div class="insight-header">🔬 Hypothesis-Driven Investigation Framework</div>
+      <div class="framework-flow">
+        <div class="flow-step">
+          <span class="flow-step-tag tag-obs">OBSERVED PATTERN</span>
+          <p>Mobile conversion (2.01%) is 49% lower than Desktop (3.95%); Buy Now Pay Later suffers a 12.07% authorization failure rate.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-inv">INVESTIGATION</span>
+          <p>Cross-tabulating Device x Channel shows Mobile + Paid Social + New Users converts at only 1.80% with 74.8% cart drop-off and 63.8s checkout time.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-hyp">HYPOTHESIS</span>
+          <p>Mobile drop-off is associated with checkout input fatigue and payment friction. Slower page load latency is a potential contributor.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-rec">RECOMMENDATION</span>
+          <p>Test a single-page frictionless checkout and deploy an instant card fallback retry modal when BNPL credit checks fail.</p>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-tag tag-met">SUCCESS METRIC</span>
+          <p>Mobile Checkout-to-Order Conversion Rate (Target: > 60%) and Payment Authorization Success Rate (> 97%).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latency & Payment Charts -->
+    <div class="charts-grid-2">
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Checkout Page Load Latency vs Conversion Rate (%)</span>
+          <span class="panel-subtitle">Sessions grouped by telemetry latency</span>
+        </div>
+        <canvas id="chartP5Latency" height="200"></canvas>
+      </div>
+      <div class="chart-panel">
+        <div class="panel-title">
+          <span>Payment Gateway Failure Rate by Method (%)</span>
+          <span class="panel-subtitle">900 authorization attempts</span>
+        </div>
+        <canvas id="chartP5Payment" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Simulated A/B Testing Section -->
+    <div class="chart-panel" style="margin-bottom:1.25rem;">
+      <div class="panel-title">
+        <span>🧪 Simulated Product Experiment: EXP-CHK-2025-Q3 (Checkout Redesign)</span>
+        <span class="panel-subtitle">Control (Standard Multi-Step) vs Treatment (One-Step Frictionless)</span>
+      </div>
+
+      <div class="kpi-grid" style="margin-bottom:1rem;">
+        <div class="kpi-card">
+          <div class="kpi-label">Control Conversion</div>
+          <div class="kpi-value">57.50%</div>
+          <div class="kpi-sub">713 users | 410 conversions</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Treatment Conversion</div>
+          <div class="kpi-value" style="color:#34d399;">61.83%</div>
+          <div class="kpi-sub">723 users | 447 conversions</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Relative Uplift</div>
+          <div class="kpi-value" style="color:#34d399;">+7.53%</div>
+          <div class="kpi-sub">+4.33 pp Absolute Difference</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Statistical Test (Z-Score)</div>
+          <div class="kpi-value">Z = 1.67</div>
+          <div class="kpi-sub">p = 0.0950 | 95% CI [-0.75%, +9.39%]</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SRM Diagnostic Check</div>
+          <div class="kpi-value" style="color:#34d399;">PASS</div>
+          <div class="kpi-sub">&chi;² = 0.0696 (p = 0.7919)</div>
+        </div>
+      </div>
+
+      <div class="charts-grid-2">
+        <div>
+          <canvas id="chartP5AB" height="180"></canvas>
+        </div>
+        <div class="data-table-container" style="margin-bottom:0; background:#0c1322;">
+          <div class="panel-title">Guardrail & Device Interaction Metrics</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Variant</th>
+                <th>Avg Duration</th>
+                <th>Error Rate</th>
+                <th>Mobile Conversion</th>
+                <th>Desktop Conversion</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Control (A)</strong></td>
+                <td>66.3s</td>
+                <td>5.19%</td>
+                <td>52.54%</td>
+                <td>63.04%</td>
+              </tr>
+              <tr>
+                <td><strong>Treatment (B)</strong></td>
+                <td><strong>49.7s</strong> (-16.6s)</td>
+                <td>6.92% (+1.7 pp)</td>
+                <td><strong>57.82%</strong> (+5.3 pp)</td>
+                <td><strong>67.36%</strong> (+4.3 pp)</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size:0.75rem; color:#94a3b8; margin-top:0.75rem; line-height:1.4;">
+            <em>Note on Decision:</em> The simulated experiment shows a measurable positive difference between treatment and control, with especially strong lift on mobile (+5.28 pp). A production rollout would require validation using real user traffic and guardrail metrics to confirm statistical significance at &alpha; = 0.05.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT FOR CHARTS & DYNAMIC FILTERING -->
+  <script>
+    // Tab switching
+    function switchTab(idx) {
+      document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+      document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === idx));
+    }
+
+    // Chart instances store
+    let charts = {};
+
+    // Base aggregated data slices
+    const baselineData = {
+      All: { gmv: 89003, orders: 857, conv: 2.68, aov: 103.85, sessions: 32000, activeUsers: 8769 },
+      Desktop: { gmv: 46478, orders: 447, conv: 3.95, aov: 103.98, sessions: 11329, activeUsers: 3410 },
+      Mobile: { gmv: 39715, orders: 383, conv: 2.01, aov: 103.69, sessions: 19072, activeUsers: 5120 },
+      Tablet: { gmv: 2810, orders: 27, conv: 1.69, aov: 104.07, sessions: 1599, activeUsers: 480 }
+    };
+
+    function applyFilters() {
+      const dev = document.getElementById('filterDevice').value;
+      const data = baselineData[dev] || baselineData.All;
+
+      document.getElementById('kpiGMV').textContent = '$' + data.gmv.toLocaleString();
+      document.getElementById('kpiOrders').textContent = data.orders.toLocaleString();
+      document.getElementById('kpiConversion').textContent = data.conv.toFixed(2) + '%';
+      document.getElementById('kpiAOV').textContent = '$' + data.aov.toFixed(2);
+      document.getElementById('kpiSessions').textContent = data.sessions.toLocaleString();
+
+      if (dev === 'Mobile') {
+        document.getElementById('subConversion').textContent = 'Viewing Mobile Slice (19,072 sessions)';
+      } else if (dev === 'Desktop') {
+        document.getElementById('subConversion').textContent = 'Viewing Desktop Slice (11,329 sessions)';
+      } else {
+        document.getElementById('subConversion').textContent = 'Desktop 3.95% vs Mobile 2.01%';
+      }
+    }
+
+    function resetFilters() {
+      document.getElementById('filterDevice').value = 'All';
+      document.getElementById('filterChannel').value = 'All';
+      document.getElementById('filterQuarter').value = 'All';
+      document.getElementById('filterCategory').value = 'All';
+      applyFilters();
+    }
+
+    window.onload = function() {
+      // 1. P1: Revenue Trend
+      charts.revenue = new Chart(document.getElementById('chartP1Revenue'), {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          datasets: [{
+            label: 'GMV ($)',
+            data: [3405, 3418, 4632, 3854, 5427, 3918, 4350, 8386, 9723, 10207, 13420, 18260],
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.12)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e293b' } }, x: { grid: { display: false } } } }
+      });
+
+      // 2. P1: Device
+      charts.device = new Chart(document.getElementById('chartP1Device'), {
+        type: 'bar',
+        data: {
+          labels: ['Desktop', 'Mobile', 'Tablet'],
+          datasets: [{
+            data: [3.95, 2.01, 1.69],
+            backgroundColor: ['#6366f1', '#f59e0b', '#64748b']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e293b' }, title: { display: true, text: 'Conversion Rate (%)', color: '#94a3b8' } }, x: { grid: { display: false } } } }
+      });
+
+      // 3. P2: Funnel
+      charts.funnel = new Chart(document.getElementById('chartP2Funnel'), {
+        type: 'bar',
+        data: {
+          labels: ['1. Visit', '2. Browse', '3. Product View', '4. Add to Cart', '5. Checkout', '6. Payment', '7. Purchase'],
+          datasets: [{
+            data: [32000, 20376, 13841, 4823, 1436, 900, 857],
+            backgroundColor: '#6366f1'
+          }]
+        },
+        options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#1e293b' } }, y: { grid: { display: false } } } }
+      });
+
+      // 4. P2: Drop-off
+      charts.dropoff = new Chart(document.getElementById('chartP2Dropoff'), {
+        type: 'bar',
+        data: {
+          labels: ['Visit -> Browse', 'Browse -> View', 'View -> Cart', 'Cart -> Checkout', 'Checkout -> Payment', 'Payment -> Buy'],
+          datasets: [{
+            data: [36.33, 32.07, 65.15, 70.23, 37.33, 4.78],
+            backgroundColor: ['#64748b', '#64748b', '#ef4444', '#ef4444', '#f59e0b', '#10b981']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e293b' }, title: { display: true, text: 'Drop-off %', color: '#94a3b8' } } } }
+      });
+
+      // 5. P3: Retention
+      charts.retention = new Chart(document.getElementById('chartP3Retention'), {
+        type: 'line',
+        data: {
+          labels: ['Month 0', 'Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'],
+          datasets: [{
+            label: 'Retention %',
+            data: [0.65, 1.05, 1.15, 1.10, 1.15, 1.00, 1.10],
+            borderColor: '#10b981',
+            tension: 0.3
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e293b' } } } }
+      });
+
+      // 6. P3: RFM
+      charts.rfm = new Chart(document.getElementById('chartP3RFM'), {
+        type: 'doughnut',
+        data: {
+          labels: ['At Risk (33.3%)', 'Champions (28.9%)', 'Loyal (20.8%)', 'Lost (7.1%)', 'Potential Loyalists (6.2%)', 'Promising (3.7%)'],
+          datasets: [{
+            data: [29618, 25745, 18546, 6290, 5516, 3289],
+            backgroundColor: ['#f59e0b', '#10b981', '#6366f1', '#ef4444', '#38bdf8', '#a855f7']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } } } }
+      });
+
+      // 7. P4: Scatter Quadrant Plot (View->Cart vs Cart->Order)
+      charts.scatter = new Chart(document.getElementById('chartP4Scatter'), {
+        type: 'bubble',
+        data: {
+          datasets: [
+            { label: 'Home & Kitchen', data: [{ x: 32.0, y: 17.03, r: 16 }], backgroundColor: '#6366f1' },
+            { label: 'Electronics', data: [{ x: 29.8, y: 16.94, r: 14 }], backgroundColor: '#38bdf8' },
+            { label: 'Apparel', data: [{ x: 39.9, y: 18.80, r: 13 }], backgroundColor: '#10b981' },
+            { label: 'Sports', data: [{ x: 33.1, y: 16.96, r: 9 }], backgroundColor: '#f59e0b' },
+            { label: 'Beauty', data: [{ x: 40.2, y: 18.61, r: 9 }], backgroundColor: '#ec4899' }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ': View->Cart ' + ctx.raw.x + '%, Cart->Order ' + ctx.raw.y + '%';
+                }
+              }
+            },
+            legend: { labels: { color: '#94a3b8' } }
+          },
+          scales: {
+            x: { min: 25, max: 45, grid: { color: '#1e293b' }, title: { display: true, text: 'View-to-Cart Conversion %', color: '#94a3b8' } },
+            y: { min: 14, max: 22, grid: { color: '#1e293b' }, title: { display: true, text: 'Cart-to-Order Conversion %', color: '#94a3b8' } }
+          }
+        }
+      });
+
+      // 8. P4: Pareto Curve
+      charts.pareto = new Chart(document.getElementById('chartP4Pareto'), {
+        type: 'line',
+        data: {
+          labels: ['Top 3%', 'Top 6%', 'Top 9%', 'Top 15%', 'Top 21%', 'Top 30%', 'Top 50%', '100%'],
+          datasets: [{
+            label: 'Cumulative Revenue %',
+            data: [14.89, 22.71, 29.11, 37.88, 45.40, 56.02, 74.20, 100.0],
+            borderColor: '#f59e0b',
+            fill: true,
+            backgroundColor: 'rgba(245, 158, 11, 0.1)'
+          }]
+        },
+        options: { responsive: true, scales: { y: { max: 100, grid: { color: '#1e293b' } } } }
+      });
+
+      // 9. P5: Latency
+      charts.latency = new Chart(document.getElementById('chartP5Latency'), {
+        type: 'bar',
+        data: {
+          labels: ['< 1.5s (Fast)', '1.5s - 2.5s (Moderate)', '2.5s - 4.0s (Slow)', '> 4.0s (Critical)'],
+          datasets: [
+            { label: 'Desktop Conv %', data: [14.90, 17.66, 17.57, 11.11], backgroundColor: '#6366f1' },
+            { label: 'Mobile Conv %', data: [10.89, 10.49, 9.03, 10.53], backgroundColor: '#f59e0b' }
+          ]
+        },
+        options: { responsive: true, scales: { y: { grid: { color: '#1e293b' }, title: { display: true, text: 'Conversion %', color: '#94a3b8' } } } }
+      });
+
+      // 10. P5: Payment Failures
+      charts.payment = new Chart(document.getElementById('chartP5Payment'), {
+        type: 'bar',
+        data: {
+          labels: ['BNPL', 'Debit Card', 'PayPal', 'Apple Pay', 'Credit Card'],
+          datasets: [{
+            data: [12.07, 6.49, 5.78, 3.23, 2.81],
+            backgroundColor: ['#ef4444', '#f59e0b', '#f59e0b', '#10b981', '#10b981']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#1e293b' }, title: { display: true, text: 'Failure %', color: '#94a3b8' } } } }
+      });
+
+      // 11. P5: A/B Test Lift
+      charts.ab = new Chart(document.getElementById('chartP5AB'), {
+        type: 'bar',
+        data: {
+          labels: ['Desktop', 'Mobile', 'Overall'],
+          datasets: [
+            { label: 'Control (Multi-step)', data: [63.04, 52.54, 57.50], backgroundColor: '#64748b' },
+            { label: 'Treatment (1-step)', data: [67.36, 57.82, 61.83], backgroundColor: '#10b981' }
+          ]
+        },
+        options: { responsive: true, scales: { y: { min: 45, max: 72, grid: { color: '#1e293b' }, title: { display: true, text: 'Checkout Conversion %', color: '#94a3b8' } } } }
+      });
+    };
+  </script>
+</body>
+</html>

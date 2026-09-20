@@ -1,0 +1,250 @@
+// =============================================================================
+// E-commerce Customer Journey & Conversion Analytics
+// DAX Measure Library for Power BI
+// Schema: Ralph Kimball Star Schema
+// Display Folders:
+//   1. Core Financial & Conversion Metrics
+//   2. Funnel & Abandonment Metrics
+//   3. Customer Cohort & RFM Metrics
+//   4. Product & Merchandising Metrics
+//   5. Root-Cause & A/B Experimentation Metrics
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// FOLDER: 1. Core Financial & Conversion Metrics
+// -----------------------------------------------------------------------------
+
+[Total Gross Revenue] = 
+SUM(fact_orders[total_amount])
+
+[Net Merchandise Value] = 
+SUM(fact_orders[subtotal])
+
+[Total Discounts] = 
+SUM(fact_orders[discount_amount])
+
+[Total Shipping Collected] = 
+SUM(fact_orders[shipping_fee])
+
+[Total Orders] = 
+DISTINCTCOUNT(fact_orders[order_id])
+
+[Total Customers] = 
+DISTINCTCOUNT(fact_orders[user_key])
+
+[Total Active Users] = 
+DISTINCTCOUNT(fact_sessions[user_key])
+
+[Total Sessions] = 
+DISTINCTCOUNT(fact_sessions[session_id])
+
+[Average Order Value (AOV)] = 
+DIVIDE(
+    [Total Gross Revenue],
+    [Total Orders],
+    0
+)
+
+[Overall Conversion Rate %] = 
+DIVIDE(
+    [Total Orders],
+    [Total Sessions],
+    0
+) * 100
+
+[Average Revenue Per User (ARPU)] = 
+DIVIDE(
+    [Total Gross Revenue],
+    [Total Customers],
+    0
+)
+
+[Repeat Purchase Rate %] = 
+VAR CustomerOrderCounts = 
+    ADDCOLUMNS(
+        VALUES(fact_orders[user_key]),
+        "@Orders", CALCULATE(DISTINCTCOUNT(fact_orders[order_id]))
+    )
+VAR RepeatBuyers = 
+    COUNTROWS(FILTER(CustomerOrderCounts, [@Orders] > 1))
+VAR TotalBuyers = 
+    COUNTROWS(CustomerOrderCounts)
+RETURN
+    DIVIDE(RepeatBuyers, TotalBuyers, 0) * 100
+
+[Revenue MoM Growth %] = 
+VAR CurrentRevenue = [Total Gross Revenue]
+VAR PreviousMonthRevenue = 
+    CALCULATE(
+        [Total Gross Revenue],
+        DATEADD(dim_date[full_date], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentRevenue - PreviousMonthRevenue, PreviousMonthRevenue, 0) * 100
+
+
+// -----------------------------------------------------------------------------
+// FOLDER: 2. Funnel & Abandonment Metrics
+// -----------------------------------------------------------------------------
+
+[Funnel - Step 1 Visits] = 
+[Total Sessions]
+
+[Funnel - Step 2 Browsed] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_events[session_id]),
+    fact_events[event_name] = "browse_search"
+)
+
+[Funnel - Step 3 Product Views] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_events[session_id]),
+    fact_events[event_name] = "product_view"
+)
+
+[Funnel - Step 4 Add to Cart] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_events[session_id]),
+    fact_events[event_name] = "add_to_cart"
+)
+
+[Funnel - Step 5 Checkout Initiated] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_events[session_id]),
+    fact_events[event_name] = "checkout_initiated"
+)
+
+[Funnel - Step 6 Payment Attempted] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_events[session_id]),
+    fact_events[event_name] = "payment_attempted"
+)
+
+[Funnel - Step 7 Purchase Completed] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_events[session_id]),
+    fact_events[event_name] = "purchase_completed"
+)
+
+[Cart Abandonment Rate %] = 
+VAR CartSessions = [Funnel - Step 4 Add to Cart]
+VAR CheckoutSessions = [Funnel - Step 5 Checkout Initiated]
+RETURN
+    DIVIDE(CartSessions - CheckoutSessions, CartSessions, 0) * 100
+
+[Checkout Abandonment Rate %] = 
+VAR CheckoutSessions = [Funnel - Step 5 Checkout Initiated]
+VAR PurchasedSessions = [Funnel - Step 7 Purchase Completed]
+RETURN
+    DIVIDE(CheckoutSessions - PurchasedSessions, CheckoutSessions, 0) * 100
+
+[Stage 1 to 2 Conversion %] = 
+DIVIDE([Funnel - Step 2 Browsed], [Funnel - Step 1 Visits], 0) * 100
+
+[Stage 3 to 4 Conversion % (View-to-Cart)] = 
+DIVIDE([Funnel - Step 4 Add to Cart], [Funnel - Step 3 Product Views], 0) * 100
+
+[Stage 5 to 7 Conversion % (Checkout-to-Order)] = 
+DIVIDE([Funnel - Step 7 Purchase Completed], [Funnel - Step 5 Checkout Initiated], 0) * 100
+
+
+// -----------------------------------------------------------------------------
+// FOLDER: 3. Customer Cohort & RFM Metrics
+// -----------------------------------------------------------------------------
+
+[Cohort Month] = 
+SELECTEDVALUE(dim_user[cohort_month])
+
+[Cohort Size] = 
+DISTINCTCOUNT(dim_user[user_key])
+
+[Cohort Month Active Users] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_orders[user_key]),
+    USERELATIONSHIP(dim_date[date_key], fact_orders[date_key])
+)
+
+[Cohort Retention Rate %] = 
+VAR BaseCohortSize = 
+    CALCULATE(
+        DISTINCTCOUNT(dim_user[user_key]),
+        ALLEXCEPT(dim_user, dim_user[cohort_month])
+    )
+VAR ActiveInPeriod = DISTINCTCOUNT(fact_orders[user_key])
+RETURN
+    DIVIDE(ActiveInPeriod, BaseCohortSize, 0) * 100
+
+[Customer Recency Days] = 
+VAR MaxOrderDate = MAX(fact_orders[date_key])
+VAR RefDate = 20251231
+RETURN
+    IF(ISBLANK(MaxOrderDate), BLANK(), RefDate - MaxOrderDate)
+
+[Customer Lifetime Orders] = 
+CALCULATE(DISTINCTCOUNT(fact_orders[order_id]))
+
+[Customer Lifetime Spend] = 
+CALCULATE(SUM(fact_orders[total_amount]))
+
+
+// -----------------------------------------------------------------------------
+// FOLDER: 4. Product & Merchandising Metrics
+// -----------------------------------------------------------------------------
+
+[Total Units Sold] = 
+SUM(fact_order_items[quantity])
+
+[Total Cost of Goods Sold (COGS)] = 
+SUM(fact_order_items[line_cost])
+
+[Total Gross Profit] = 
+SUM(fact_order_items[line_profit])
+
+[Gross Margin %] = 
+DIVIDE([Total Gross Profit], [Net Merchandise Value], 0) * 100
+
+[Product View-to-Order %] = 
+DIVIDE([Total Orders], [Funnel - Step 3 Product Views], 0) * 100
+
+[Category Revenue Share %] = 
+VAR CategorySales = [Net Merchandise Value]
+VAR TotalStoreSales = CALCULATE([Net Merchandise Value], ALL(dim_product))
+RETURN
+    DIVIDE(CategorySales, TotalStoreSales, 0) * 100
+
+
+// -----------------------------------------------------------------------------
+// FOLDER: 5. Root-Cause & A/B Experimentation Metrics
+// -----------------------------------------------------------------------------
+
+[Payment Gateway Failure Rate %] = 
+VAR FailedPayments = 
+    CALCULATE(
+        COUNTROWS(fact_payments),
+        fact_payments[payment_status] = "Failed"
+    )
+VAR TotalAttempts = COUNTROWS(fact_payments)
+RETURN
+    DIVIDE(FailedPayments, TotalAttempts, 0) * 100
+
+[Lost GMV from Payment Declines] = 
+CALCULATE(
+    SUM(fact_payments[amount]),
+    fact_payments[payment_status] = "Failed"
+)
+
+[Average Page Load Time (ms)] = 
+AVERAGE(fact_events[page_load_ms])
+
+// A/B Experiment Measures
+[A/B Control Conversions] = 
+CALCULATE(
+    DISTINCTCOUNT(fact_orders[order_id]),
+    fact_sessions[device_key] = 1 // or experiment variant flag
+)
+
+[A/B Relative Conversion Uplift %] = 
+VAR ControlRate = 0.5750
+VAR TreatmentRate = 0.6183
+RETURN
+    DIVIDE(TreatmentRate - ControlRate, ControlRate, 0) * 100

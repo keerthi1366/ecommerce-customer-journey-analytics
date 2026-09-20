@@ -1,0 +1,3 @@
+check_code,check_description,failed_count,check_status
+DQ_TIME_01,Events occurring strictly before session_start,0,PASS
+DQ_TIME_02,Order timestamp occurring strictly before session_start,0,PASS

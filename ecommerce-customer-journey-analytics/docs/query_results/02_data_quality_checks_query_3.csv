@@ -1,0 +1,4 @@
+check_code,check_description,failed_count,check_status
+DQ_DOM_01,Negative or zero total order amount,0,PASS
+DQ_DOM_02,Invalid item quantity (quantity <= 0),0,PASS
+DQ_DOM_03,Negative product retail or cost prices,0,PASS
